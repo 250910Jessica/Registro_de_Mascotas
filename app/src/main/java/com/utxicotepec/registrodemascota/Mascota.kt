@@ -1,9 +1,10 @@
 package com.utxicotepec.registrodemascota
 
 data class Mascota(
-    val nombreMascota: String,
-    val nombreDuenio: String,
-    val peso: Double,
+    val nombre: String,
+    val apellidos: String,
+    val peso: Int,
     val fechaNacimiento: Long,
-    val especie: String
+    val especie: String,
+    val antecedentes: String
 )

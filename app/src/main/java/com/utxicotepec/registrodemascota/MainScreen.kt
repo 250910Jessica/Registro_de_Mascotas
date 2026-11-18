@@ -24,7 +24,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -99,11 +105,12 @@ fun MainView(modifier: Modifier,
             if (errors == null) {
                 simulateDelayLong()
                 val mascota = Mascota(
-                    nombreMascota = nombreValue,
-                    nombreDuenio = apellidosValue,
-                    peso = pesoValue.toDoubleOrNull() ?: 0.0,
+                    nombre = nombreValue,
+                    apellidos = apellidosValue,
+                    peso = pesoValue.toIntOrNull() ?: 0,
                     fechaNacimiento = dateValue ?: 0,
-                    especie = selectedOption
+                    especie = selectedOption,
+                    antecedentes = antecedentesValue
                 )
                 onSave(mascota)
             } else {
@@ -191,28 +198,12 @@ fun MainView(modifier: Modifier,
                     }
                 }
                 // Occupation / Especie
-                Column(Modifier
-                    .padding(dimensionResource(R.dimen.common_padding_min))
-                    .selectableGroup()) {
-                    Text(stringResource(R.string.section_occupation),
-                        style = Typography.labelLarge)
-                    profiles.forEach { text ->
-                        Row(Modifier
-                            .fillMaxWidth()
-                            .height(dimensionResource(R.dimen.rb_row_height))
-                            .selectable(
-                                selected = (text == selectedOption),
-                                onClick = { onOptionSelected(text) },
-                                role = Role.RadioButton
-                            ),
-                            verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = (text == selectedOption),
-                                onClick = null)
-                            Text(text,
-                                modifier = Modifier.padding(start = dimensionResource(R.dimen.common_padding_default)))
-                        }
-                    }
-                }
+                AntDropdown(
+                    labelRes = R.string.section_occupation,
+                    options = profiles.toList(),
+                    selectedOption = selectedOption,
+                    onOptionSelected = { onOptionSelected(it) }
+                )
                 // Notes / Antecedentes
                 AntTextField(labelRes = R.string.hint_notes,
                     iconRes = R.drawable.ic_notes,
@@ -251,6 +242,58 @@ fun MainView(modifier: Modifier,
                 .clickable(interactionSource = null, indication = null) {},
                 contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
+            }
+        }
+    }
+}
+/**
+ * Menú desplegable (ExposedDropdownMenuBox de Material 3) que sustituye
+ * al grupo de opciones (RadioButton). Muestra la opción seleccionada en un
+ * campo de solo lectura y despliega la lista al tocarlo.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AntDropdown(
+    modifier: Modifier = Modifier,
+    labelRes: Int,
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = dimensionResource(R.dimen.common_padding_default))
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+            readOnly = true,
+            value = selectedOption,
+            onValueChange = {},
+            label = { Text(stringResource(labelRes)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
             }
         }
     }

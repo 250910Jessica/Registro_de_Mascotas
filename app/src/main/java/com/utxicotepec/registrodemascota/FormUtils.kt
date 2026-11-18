@@ -7,11 +7,12 @@ import java.util.Locale
 
 fun mascotaFormatter(mascota: Mascota): String {
     val result = StringBuilder()
-    result.append("Nombre de la mascota: ${mascota.nombreMascota}\n")
-    result.append("Nombre del dueño: ${mascota.nombreDuenio}\n")
+    result.append("Nombre de la mascota: ${mascota.nombre}\n")
+    result.append("Nombre del dueño: ${mascota.apellidos}\n")
     result.append("Peso: ${mascota.peso} kg\n")
     result.append("Fecha de nacimiento: ${convertMillisToDate(mascota.fechaNacimiento)}\n")
-    result.append("Especie: ${mascota.especie}")
+    result.append("Especie: ${mascota.especie}\n")
+    result.append("Antecedentes: ${mascota.antecedentes}")
     return result.toString()
 }
 
